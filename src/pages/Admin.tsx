@@ -16,8 +16,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ProductForm } from '@/components/admin/ProductForm';
+import { ProfileForm } from '@/components/admin/ProfileForm';
 import type { User, Session } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -26,6 +29,8 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
+  const [productFormOpen, setProductFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -98,6 +103,47 @@ const Admin = () => {
         duration: 3000,
       });
     }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Product deleted successfully!",
+      });
+      
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setProductFormOpen(true);
+  };
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setProductFormOpen(true);
+  };
+
+  const handleProductFormSuccess = () => {
+    fetchData();
+    setEditingProduct(null);
   };
 
   if (loading) {
@@ -212,8 +258,8 @@ const Admin = () => {
           <TabsList className="bg-background border border-border">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger id="messages-tab" value="messages">Messages</TabsTrigger>
+            <TabsTrigger id="settings-tab" value="settings">Settings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
@@ -229,15 +275,15 @@ const Admin = () => {
                   <div className="space-y-4">
                     <h4 className="font-semibold text-foreground">Quick Actions</h4>
                     <div className="space-y-2">
-                      <Button className="w-full justify-start" variant="outline">
+                      <Button onClick={handleAddProduct} className="w-full justify-start" variant="outline">
                         <Plus className="h-4 w-4 mr-2" />
                         Add New Product
                       </Button>
-                      <Button className="w-full justify-start" variant="outline">
+                      <Button onClick={() => document.getElementById('messages-tab')?.click()} className="w-full justify-start" variant="outline">
                         <FileText className="h-4 w-4 mr-2" />
                         View Messages
                       </Button>
-                      <Button className="w-full justify-start" variant="outline">
+                      <Button onClick={() => document.getElementById('settings-tab')?.click()} className="w-full justify-start" variant="outline">
                         <Settings className="h-4 w-4 mr-2" />
                         Update Profile
                       </Button>
@@ -266,7 +312,7 @@ const Admin = () => {
                     <CardTitle className="text-primary">Product Management</CardTitle>
                     <CardDescription>Manage your GRC products, templates, and toolkits</CardDescription>
                   </div>
-                  <Button className="cyber-button">
+                  <Button onClick={handleAddProduct} className="cyber-button">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Product
                   </Button>
@@ -278,14 +324,61 @@ const Admin = () => {
                     <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">No products yet</h3>
                     <p className="text-muted-foreground mb-4">Start by adding your first GRC product</p>
-                    <Button className="cyber-button">
+                    <Button onClick={handleAddProduct} className="cyber-button">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Your First Product
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Product management interface will be implemented here</p>
+                  <div className="space-y-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {products.map((product: any) => (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell className="capitalize">{product.product_type}</TableCell>
+                            <TableCell>${Number(product.price).toFixed(2)}</TableCell>
+                            <TableCell>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                product.is_active 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              }`}>
+                                {product.is_active ? 'Active' : 'Inactive'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  onClick={() => handleEditProduct(product)}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>
@@ -329,18 +422,17 @@ const Admin = () => {
           </TabsContent>
           
           <TabsContent value="settings" className="space-y-6">
-            <Card className="cyber-card">
-              <CardHeader>
-                <CardTitle className="text-primary">Settings</CardTitle>
-                <CardDescription>Manage your website settings and preferences</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Settings interface will be implemented here</p>
-              </CardContent>
-            </Card>
+            <ProfileForm />
           </TabsContent>
         </Tabs>
       </main>
+
+      <ProductForm
+        product={editingProduct}
+        open={productFormOpen}
+        onOpenChange={setProductFormOpen}
+        onSuccess={handleProductFormSuccess}
+      />
     </div>
   );
 };
