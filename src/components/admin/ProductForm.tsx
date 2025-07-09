@@ -69,7 +69,12 @@ export const ProductForm = ({ product, open, onOpenChange, onSuccess }: ProductF
       const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       
       const productData = {
-        ...data,
+        name: data.name,
+        description: data.description,
+        short_description: data.short_description || null,
+        price: data.price,
+        original_price: data.original_price || null,
+        product_type: data.product_type,
         slug,
         features: data.features ? data.features.split(',').map(f => f.trim()).filter(Boolean) : null,
         requirements: data.requirements ? data.requirements.split(',').map(r => r.trim()).filter(Boolean) : null,
