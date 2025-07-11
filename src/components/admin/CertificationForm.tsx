@@ -69,13 +69,13 @@ export const CertificationForm = ({ certification, open, onOpenChange, onSuccess
       const filePath = `certificates/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('resumes')
+        .from('certifications')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
-        .from('resumes')
+        .from('certifications')
         .getPublicUrl(filePath);
 
       return data.publicUrl;

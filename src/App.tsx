@@ -13,6 +13,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      {/* Enhanced Background Animations */}
+      <div className="cyber-grid" />
+      <div className="floating-particles" />
+      <div className="code-rain" />
+      <div className="pulse-ring" />
+      
       <Toaster />
       <Sonner />
       <BrowserRouter>
