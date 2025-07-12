@@ -18,6 +18,23 @@ const App = () => (
       <div className="floating-particles" />
       <div className="code-rain" />
       <div className="pulse-ring" />
+      <div className="geometric-bg" />
+      
+      {/* Additional floating elements */}
+      <div className="fixed top-1/4 right-1/4 w-32 h-32 opacity-20 pointer-events-none z-10">
+        <div className="w-full h-full border border-primary/30 rounded-full animate-[spiral-rotate_20s_linear_infinite]" />
+      </div>
+      <div className="fixed bottom-1/3 left-1/4 w-24 h-24 opacity-15 pointer-events-none z-10">
+        <div className="w-full h-full border-2 border-accent/40 transform rotate-45 animate-[spiral-rotate_15s_linear_infinite_reverse]" />
+      </div>
+      
+      {/* Data stream lines */}
+      <div className="fixed top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-primary/20 to-transparent opacity-30 pointer-events-none z-10">
+        <div className="w-2 h-2 bg-primary rounded-full animate-[data-stream_8s_linear_infinite]" />
+      </div>
+      <div className="fixed top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-accent/20 to-transparent opacity-25 pointer-events-none z-10">
+        <div className="w-2 h-2 bg-accent rounded-full animate-[data-stream_12s_linear_infinite]" />
+      </div>
       
       <Toaster />
       <Sonner />

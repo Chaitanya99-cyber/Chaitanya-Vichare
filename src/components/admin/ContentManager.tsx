@@ -95,12 +95,24 @@ const ContentManager = () => {
   const handleImageUpload = async (file: File, field: 'profile_image_url' | 'resume_url') => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      
+      // Use correct bucket names that exist
       const bucket = field === 'profile_image_url' ? 'avatars' : 'resumes';
+
+      // First try to create bucket if it doesn't exist (for avatars)
+      if (field === 'profile_image_url') {
+        await supabase.storage.createBucket('avatars', { public: true }).catch(() => {
+          // Bucket might already exist, ignore error
+        });
+      }
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) throw uploadError;
 
@@ -118,6 +130,7 @@ const ContentManager = () => {
         description: `${field === 'profile_image_url' ? 'Image' : 'File'} uploaded successfully`,
       });
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to upload file",

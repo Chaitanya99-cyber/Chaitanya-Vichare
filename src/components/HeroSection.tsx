@@ -115,13 +115,15 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <button
-          onClick={scrollToAbout}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-primary hover:text-accent transition-colors duration-300 animate-bounce"
-        >
-          <ChevronDown className="h-8 w-8" />
-        </button>
+        {/* Centered Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+          <button
+            onClick={scrollToAbout}
+            className="text-primary hover:text-accent transition-colors duration-300 animate-bounce p-2 rounded-full bg-background/10 backdrop-blur-sm border border-primary/20 hover:border-accent/40"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </button>
+        </div>
       </div>
     </section>
   );

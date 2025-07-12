@@ -99,6 +99,41 @@
   .matrix-bg {
     background: var(--gradient-matrix);
   }
+
+  /* Additional Background Animations */
+  .geometric-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .geometric-bg::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(45deg, transparent, rgba(var(--primary) / 0.1), transparent);
+    border-radius: 50%;
+    animation: float-diagonal 15s ease-in-out infinite;
+  }
+
+  .geometric-bg::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    right: 5%;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(-45deg, transparent, rgba(var(--accent) / 0.1), transparent);
+    border-radius: 50%;
+    animation: float-diagonal 12s ease-in-out infinite reverse;
+  }
   
   /* Enhanced Background Animations */
   .floating-particles {
@@ -317,6 +352,49 @@
 @keyframes matrix-rain {
   0% { transform: translateY(-100vh); opacity: 1; }
   100% { transform: translateY(100vh); opacity: 0; }
+}
+
+@keyframes float-diagonal {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  50% { 
+    transform: translate(30px, -30px) scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes spiral-rotate {
+  0% { 
+    transform: rotate(0deg) scale(1);
+    opacity: 0.2;
+  }
+  50% { 
+    transform: rotate(180deg) scale(1.2);
+    opacity: 0.4;
+  }
+  100% { 
+    transform: rotate(360deg) scale(1);
+    opacity: 0.2;
+  }
+}
+
+@keyframes data-stream {
+  0% { 
+    transform: translateY(100vh) translateX(0);
+    opacity: 0;
+  }
+  10% { 
+    opacity: 1;
+  }
+  90% { 
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
 }
 
 @keyframes glow-pulse {

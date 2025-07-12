@@ -85,6 +85,22 @@ const CertificationsSection = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {certifications.map((cert) => (
               <div key={cert.id} className="cyber-card group">
+                {/* Certificate Image/Preview */}
+                {cert.image_url ? (
+                  <div className="mb-4 relative group/image">
+                    <img 
+                      src={cert.image_url} 
+                      alt={cert.name}
+                      className="w-full h-32 object-cover rounded-lg border border-border group-hover:border-primary/50 transition-colors"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent rounded-lg opacity-0 group-hover/image:opacity-100 transition-opacity" />
+                  </div>
+                ) : (
+                  <div className="mb-4 h-32 bg-muted/50 rounded-lg border border-dashed border-border flex items-center justify-center">
+                    <Award className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
                   <div className="bg-primary/20 p-3 rounded-lg group-hover:bg-primary/30 transition-colors">
                     <Award className="h-6 w-6 text-primary" />
@@ -138,17 +154,30 @@ const CertificationsSection = () => {
                   )}
                 </div>
 
-                {cert.credential_url && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full neon-border bg-transparent hover:bg-primary/10"
-                    onClick={() => window.open(cert.credential_url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Verify Credential
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {cert.credential_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 neon-border bg-transparent hover:bg-primary/10"
+                      onClick={() => window.open(cert.credential_url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Verify
+                    </Button>
+                  )}
+                  {cert.image_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 neon-border bg-transparent hover:bg-accent/10"
+                      onClick={() => window.open(cert.image_url, '_blank')}
+                    >
+                      <Award className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
