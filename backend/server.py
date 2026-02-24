@@ -421,6 +421,7 @@ async def startup_event():
     logger.info("Starting up...")
     await init_default_admin()
     await init_default_profile()
+    await init_default_website_content()
     logger.info("Application ready!")
 
 # Shutdown event
