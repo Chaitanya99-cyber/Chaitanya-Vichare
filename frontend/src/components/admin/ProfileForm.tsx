@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { profileAPI, uploadAPI } from '@/services/api';
+import type { ProfileUpdate } from '@/services/api';
 import { Save, User, Upload, FileText, X } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -29,7 +30,6 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export const ProfileForm = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [profileId, setProfileId] = useState<string | null>(null);
   const [selectedResume, setSelectedResume] = useState<File | null>(null);
   const { toast } = useToast();
   
@@ -48,17 +48,9 @@ export const ProfileForm = () => {
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profile_info')
-        .select('*')
-        .single();
-      
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      const data = await profileAPI.get();
       
       if (data) {
-        setProfileId(data.id);
         reset({
           name: data.name,
           title: data.title,
@@ -94,60 +86,34 @@ export const ProfileForm = () => {
     }
   };
 
-  const uploadResume = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `resume_${Date.now()}.${fileExt}`;
-    const filePath = `resumes/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('resumes')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    const { data } = supabase.storage
-      .from('resumes')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
-  };
-
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true);
     
     try {
-      let resumeUrl = data.resume_url || null;
+      let resumeUrl = data.resume_url || undefined;
       
       // Upload resume if selected
       if (selectedResume) {
         setUploading(true);
-        resumeUrl = await uploadResume(selectedResume);
+        const uploadResult = await uploadAPI.uploadFile(selectedResume);
+        resumeUrl = uploadResult.url;
         setUploading(false);
       }
 
-      const profileData = {
-        ...data,
-        email: data.email || null,
-        phone: data.phone || null,
-        location: data.location || null,
-        linkedin_url: data.linkedin_url || null,
-        profile_image_url: data.profile_image_url || null,
+      const profileData: ProfileUpdate = {
+        name: data.name,
+        title: data.title,
+        email: data.email || undefined,
+        phone: data.phone || undefined,
+        location: data.location || undefined,
+        linkedin_url: data.linkedin_url || undefined,
+        profile_image_url: data.profile_image_url || undefined,
         resume_url: resumeUrl,
-        bio: data.bio || null,
+        bio: data.bio || undefined,
+        experience_years: data.experience_years,
       };
 
-      if (profileId) {
-        const { error } = await supabase
-          .from('profile_info')
-          .update(profileData)
-          .eq('id', profileId);
-        
-        if (error) throw error;
-      } else {
-        const { data: newProfile, error } = await supabase
-          .from('profile_info')
+      await profileAPI.update(profileData);
           .insert([profileData])
           .select()
           .single();
