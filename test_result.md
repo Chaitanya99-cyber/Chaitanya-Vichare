@@ -251,8 +251,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Backend API endpoints testing"
-    - "Authentication flow testing"
+    - "Frontend integration with backend APIs"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
