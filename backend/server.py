@@ -30,6 +30,7 @@ from database import (
     init_default_admin, init_default_profile, init_default_website_content
 )
 from phase3_routes import content_router, analytics_router, search_router
+from email_service import send_contact_notification, send_test_email
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -242,6 +243,18 @@ async def create_contact_message(message: ContactMessageCreate):
     
     await contact_messages_collection.insert_one(message_obj.model_dump())
     logger.info(f"Contact message received from: {message.email}")
+    
+    # Send email notification asynchronously (don't block response)
+    try:
+        email_sent = send_contact_notification(message_dict)
+        if email_sent:
+            logger.info(f"Email notification sent for contact from {message.email}")
+        else:
+            logger.warning(f"Failed to send email notification for contact from {message.email}")
+    except Exception as e:
+        logger.error(f"Error sending email notification: {str(e)}")
+        # Don't fail the request if email fails
+    
     return message_obj
 
 @api_router.delete("/contact-messages/{message_id}")
@@ -396,6 +409,29 @@ async def health_check():
         "database": db_status,
         "timestamp": datetime.utcnow().isoformat()
     }
+
+@api_router.post("/test-email")
+async def test_email_configuration(current_user: dict = Depends(get_current_user)):
+    """Send a test email to verify SMTP configuration (admin only)"""
+    try:
+        success = send_test_email()
+        if success:
+            return {
+                "status": "success",
+                "message": "Test email sent successfully! Check your inbox.",
+                "email": os.environ.get("SMTP_FROM_EMAIL")
+            }
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to send test email. Check server logs for details."
+            )
+    except Exception as e:
+        logger.error(f"Test email failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Email configuration error: {str(e)}"
+        )
 
 # Include the router in the main app
 app.include_router(api_router)
