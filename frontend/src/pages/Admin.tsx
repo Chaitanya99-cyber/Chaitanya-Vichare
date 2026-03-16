@@ -24,6 +24,8 @@ import { ProductForm } from '@/components/admin/ProductForm';
 import { ProfileForm } from '@/components/admin/ProfileForm';
 import { CertificationForm } from '@/components/admin/CertificationForm';
 import ContentManager from '@/components/admin/ContentManager';
+import WebsiteContentEditor from '@/components/admin/WebsiteContentEditor';
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 
 const Admin = () => {
   const [loading, setLoading] = useState(true);
@@ -267,12 +269,22 @@ const Admin = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-background border border-border overflow-x-auto w-full">
             <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-            <TabsTrigger value="content" className="text-xs sm:text-sm">Content</TabsTrigger>
+            <TabsTrigger value="website" className="text-xs sm:text-sm">Website Content</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
             <TabsTrigger value="products" className="text-xs sm:text-sm">Products</TabsTrigger>
             <TabsTrigger value="certifications" className="text-xs sm:text-sm">Certifications</TabsTrigger>
             <TabsTrigger id="messages-tab" value="messages" className="text-xs sm:text-sm">Messages</TabsTrigger>
+            <TabsTrigger value="content" className="text-xs sm:text-sm">Profile</TabsTrigger>
             <TabsTrigger id="settings-tab" value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="website" className="space-y-6">
+            <WebsiteContentEditor />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsDashboard />
+          </TabsContent>
           
           <TabsContent value="content" className="space-y-6">
             <ContentManager />

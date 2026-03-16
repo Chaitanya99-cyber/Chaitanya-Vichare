@@ -92,7 +92,6 @@ export const ProfileForm = () => {
     try {
       let resumeUrl = data.resume_url || undefined;
       
-      // Upload resume if selected
       if (selectedResume) {
         setUploading(true);
         const uploadResult = await uploadAPI.uploadFile(selectedResume);
@@ -135,35 +134,33 @@ export const ProfileForm = () => {
   return (
     <Card className="cyber-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-primary">
-          <User className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2">
+          <User className="h-5 w-5 text-primary" />
           Profile Information
         </CardTitle>
-        <CardDescription>
-          Update your profile information that appears on the website
-        </CardDescription>
+        <CardDescription>Update your professional profile details</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name *</Label>
               <Input
                 id="name"
                 {...register('name')}
-                placeholder="Your full name"
+                placeholder="John Doe"
               />
               {errors.name && (
                 <p className="text-sm text-destructive">{errors.name.message}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="title">Professional Title *</Label>
               <Input
                 id="title"
                 {...register('title')}
-                placeholder="e.g., GRC Professional"
+                placeholder="GRC Professional"
               />
               {errors.title && (
                 <p className="text-sm text-destructive">{errors.title.message}</p>
@@ -171,20 +168,30 @@ export const ProfileForm = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              {...register('bio')}
+              placeholder="Brief professional bio"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 {...register('email')}
-                placeholder="your.email@example.com"
+                placeholder="your@email.com"
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
@@ -195,7 +202,7 @@ export const ProfileForm = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
               <Input
@@ -204,7 +211,7 @@ export const ProfileForm = () => {
                 placeholder="City, Country"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="experience_years">Years of Experience *</Label>
               <Input
@@ -221,7 +228,7 @@ export const ProfileForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+            <Label htmlFor="linkedin_url">LinkedIn Profile</Label>
             <Input
               id="linkedin_url"
               {...register('linkedin_url')}
@@ -233,83 +240,41 @@ export const ProfileForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="profile_image_url">Profile Image URL</Label>
-            <Input
-              id="profile_image_url"
-              {...register('profile_image_url')}
-              placeholder="https://example.com/profile-image.jpg"
-            />
-            {errors.profile_image_url && (
-              <p className="text-sm text-destructive">{errors.profile_image_url.message}</p>
+            <Label htmlFor="resume">Resume (PDF)</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="resume"
+                type="file"
+                accept=".pdf"
+                onChange={handleResumeSelect}
+                className="cursor-pointer"
+              />
+              {selectedResume && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedResume(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {selectedResume && (
+              <p className="text-sm text-muted-foreground">
+                Selected: {selectedResume.name}
+              </p>
             )}
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Resume Upload</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-4">
-                {selectedResume ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      <span className="text-sm">{selectedResume.name}</span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedResume(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <input
-                      type="file"
-                      onChange={handleResumeSelect}
-                      className="hidden"
-                      id="resume-upload"
-                      accept=".pdf"
-                    />
-                    <label
-                      htmlFor="resume-upload"
-                      className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
-                    >
-                      Click to upload your resume (PDF only)
-                    </label>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="resume_url">Or Enter Resume URL</Label>
-              <Input
-                id="resume_url"
-                {...register('resume_url')}
-                placeholder="https://example.com/resume.pdf"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              {...register('bio')}
-              placeholder="Tell visitors about yourself and your expertise..."
-              rows={4}
-            />
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={loading || uploading}>
-              <Save className="h-4 w-4 mr-2" />
-              {uploading ? 'Uploading...' : loading ? 'Saving...' : 'Save Profile'}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            disabled={loading || uploading}
+            className="w-full"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {loading ? 'Saving...' : uploading ? 'Uploading...' : 'Save Profile'}
+          </Button>
         </form>
       </CardContent>
     </Card>

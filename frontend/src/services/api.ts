@@ -373,3 +373,194 @@ export const uploadAPI = {
 export const healthCheck = () => {
   return apiCall('/health');
 };
+
+// ==================== WEBSITE CONTENT API ====================
+
+export interface WebsiteContent {
+  id: string;
+  hero: HeroContent;
+  about: AboutContent;
+  experience: ExperienceContent;
+  skills: SkillsContent;
+  resume: ResumeContent;
+  settings: SiteSettings;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HeroContent {
+  title: string;
+  subtitle: string;
+  description: string;
+  cta_text: string;
+  cta_link: string;
+  background_image?: string;
+  profile_image?: string;
+}
+
+export interface AboutContent {
+  heading: string;
+  subheading: string;
+  bio: string;
+  description: string;
+  image_url?: string;
+  stats: Array<{ label: string; value: string }>;
+}
+
+export interface ExperienceItem {
+  id: string;
+  company: string;
+  role: string;
+  location?: string;
+  start_date: string;
+  end_date?: string;
+  is_current: boolean;
+  description: string;
+  responsibilities: string[];
+  technologies: string[];
+  display_order: number;
+}
+
+export interface ExperienceContent {
+  heading: string;
+  subheading: string;
+  experiences: ExperienceItem[];
+}
+
+export interface SkillCategory {
+  id: string;
+  name: string;
+  skills: string[];
+  icon?: string;
+  display_order: number;
+}
+
+export interface SkillsContent {
+  heading: string;
+  subheading: string;
+  categories: SkillCategory[];
+}
+
+export interface ResumeContent {
+  heading: string;
+  subheading: string;
+  description: string;
+  resume_url?: string;
+  show_section: boolean;
+}
+
+export interface SiteSettings {
+  site_title: string;
+  site_description: string;
+  favicon_url?: string;
+  logo_url?: string;
+  primary_color: string;
+  accent_color: string;
+  footer_text: string;
+  show_products_section: boolean;
+  show_certifications_section: boolean;
+  show_contact_section: boolean;
+  social_links: {
+    linkedin?: string;
+    github?: string;
+    twitter?: string;
+    email?: string;
+    phone?: string;
+  };
+}
+
+export const websiteContentAPI = {
+  getAll: () => apiCall<WebsiteContent>('/website-content'),
+  getHero: () => apiCall<HeroContent>('/website-content/hero'),
+  updateHero: (data: Partial<HeroContent>) => 
+    apiCall<HeroContent>('/website-content/hero', { method: 'PUT', body: JSON.stringify(data) }),
+  getAbout: () => apiCall<AboutContent>('/website-content/about'),
+  updateAbout: (data: Partial<AboutContent>) => 
+    apiCall<AboutContent>('/website-content/about', { method: 'PUT', body: JSON.stringify(data) }),
+  getExperience: () => apiCall<ExperienceContent>('/website-content/experience'),
+  updateExperience: (data: Partial<ExperienceContent>) => 
+    apiCall<ExperienceContent>('/website-content/experience', { method: 'PUT', body: JSON.stringify(data) }),
+  getSkills: () => apiCall<SkillsContent>('/website-content/skills'),
+  updateSkills: (data: Partial<SkillsContent>) => 
+    apiCall<SkillsContent>('/website-content/skills', { method: 'PUT', body: JSON.stringify(data) }),
+  getResume: () => apiCall<ResumeContent>('/website-content/resume'),
+  updateResume: (data: Partial<ResumeContent>) => 
+    apiCall<ResumeContent>('/website-content/resume', { method: 'PUT', body: JSON.stringify(data) }),
+  getSettings: () => apiCall<SiteSettings>('/website-content/settings'),
+  updateSettings: (data: Partial<SiteSettings>) => 
+    apiCall<SiteSettings>('/website-content/settings', { method: 'PUT', body: JSON.stringify(data) }),
+};
+
+// ==================== ANALYTICS API ====================
+
+export interface AnalyticsSummary {
+  total_page_views: number;
+  unique_visitors: number;
+  total_sessions: number;
+  avg_session_duration: number;
+  top_pages: Array<{ page: string; views: number }>;
+  popular_products: any[];
+  contact_form_submissions: number;
+  date_range: string;
+}
+
+export const analyticsAPI = {
+  trackPageView: (page_path: string, page_title?: string) => {
+    // Get or create visitor/session IDs
+    let visitorId = localStorage.getItem('visitor_id');
+    if (!visitorId) {
+      visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('visitor_id', visitorId);
+    }
+    
+    let sessionId = sessionStorage.getItem('session_id');
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem('session_id', sessionId);
+    }
+
+    return fetch(`${API_BASE_URL}/api/analytics/pageview?page_path=${encodeURIComponent(page_path)}${page_title ? `&page_title=${encodeURIComponent(page_title)}` : ''}`, {
+      method: 'POST',
+      headers: {
+        'x-visitor-id': visitorId,
+        'x-session-id': sessionId,
+      },
+    }).catch(err => console.error('Analytics tracking failed:', err));
+  },
+
+  getSummary: (days: number = 30) => 
+    apiCall<AnalyticsSummary>(`/analytics/summary?days=${days}`),
+};
+
+// ==================== SEARCH API ====================
+
+export interface SearchParams {
+  q?: string;
+  product_type?: string;
+  min_price?: number;
+  max_price?: number;
+  tags?: string;
+  sort_by?: string;
+  sort_order?: string;
+  limit?: number;
+  skip?: number;
+}
+
+export interface SearchResponse {
+  products: Product[];
+  total: number;
+  limit: number;
+  skip: number;
+}
+
+export const searchAPI = {
+  searchProducts: (params: SearchParams) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value.toString());
+      }
+    });
+    return apiCall<SearchResponse>(`/search/products?${queryParams.toString()}`);
+  },
+};
