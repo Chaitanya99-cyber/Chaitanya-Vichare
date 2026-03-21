@@ -3,7 +3,7 @@
  * Handles all communication with the FastAPI backend
  */
 
-const API_BASE_URL = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || '';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '';
 
 // Token management
 const TOKEN_KEY = 'auth_token';
@@ -44,14 +44,24 @@ async function apiCall<T>(
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'An error occurred' }));
-      throw new Error(error.detail || `HTTP ${response.status}`);
+      let errorMessage = `HTTP ${response.status}`;
+      try {
+        const error = await response.json();
+        errorMessage = error.detail || error.message || errorMessage;
+      } catch {
+        // If response is not JSON, use status text
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
   } catch (error) {
     console.error(`API call failed for ${endpoint}:`, error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Network error - please check your connection');
   }
 }
 
